@@ -1,3 +1,7 @@
 FROM nicolaka/netshoot:latest
 
-RUN apk add gost sing-box
+WORKDIR /app
+
+RUN apk add gost sing-box kcptun
+
+COPY ./network-probe ./
