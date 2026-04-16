@@ -1,9 +1,8 @@
-FROM nicolaka/netshoot:latest
+FROM someguy123/net-tools:latest
 
 WORKDIR /app
 
-RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
-    apk update && \
-    apk add --no-cache gost sing-box kcptun
+RUN apt update
+RUN apt install gost sing-box kcptun
 
 COPY ./network-probe ./network-probe
