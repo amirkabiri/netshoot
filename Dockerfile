@@ -2,9 +2,12 @@ FROM someguy123/net-tools:latest
 
 USER root
 
-# 1. Update and install core tools with better error handling
-# We use --fix-missing and multiple retries behavior implicitly by cleaning first
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# 1. Switch to old-releases mirrors to fix connection/404 errors on Ubuntu 18.04
+RUN sed -i 's/archive.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+
+# 2. Update and install core tools
+RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
     curl \
     ca-certificates \
     gnupg \
@@ -14,15 +17,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update
 
-# 2. Install Python 3.12
-# Adding python3-pip just in case your script needs dependencies later
+# 3. Install Python 3.12
 RUN apt-get install -y --no-install-recommends \
     python3.12 \
     python3.12-venv \
     python3.12-distutils && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 3. Setup SagerNet / sing-box
+# 4. Setup SagerNet / sing-box
 RUN mkdir -p /etc/apt/keyrings && \
     curl -fsSL https://sing-box.app/gpg.key | gpg --dearmor -o /etc/apt/keyrings/sagernet.gpg && \
     chmod a+r /etc/apt/keyrings/sagernet.gpg && \
@@ -31,7 +33,7 @@ RUN mkdir -p /etc/apt/keyrings && \
     apt-get update && \
     apt-get install -y sing-box
 
-# 4. Setup GOST
+# 5. Setup GOST
 RUN GOST_VERSION=$(curl -s https://api.github.com/repos/go-gost/gost/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//') && \
     wget https://github.com/go-gost/gost/releases/download/v${GOST_VERSION}/gost_${GOST_VERSION}_linux_amd64.tar.gz && \
     tar -zxvf gost_${GOST_VERSION}_linux_amd64.tar.gz && \
@@ -39,7 +41,7 @@ RUN GOST_VERSION=$(curl -s https://api.github.com/repos/go-gost/gost/releases/la
     chmod +x /usr/local/bin/gost && \
     rm gost_${GOST_VERSION}_linux_amd64.tar.gz
 
-# 5. Set Python 3.12 as the default 'python3' alias
+# 6. Set Python 3.12 as the default
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
 
 WORKDIR /root
