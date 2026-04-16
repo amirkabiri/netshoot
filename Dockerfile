@@ -2,7 +2,7 @@ FROM someguy123/net-tools:latest
 
 USER root
 
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     curl \
     ca-certificates \
     gpg \
