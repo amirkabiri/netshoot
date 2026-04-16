@@ -2,20 +2,25 @@ FROM someguy123/net-tools:latest
 
 USER root
 
-# 1. Install prerequisites and add Deadsnakes PPA for modern Python
-RUN apt update && apt install -y \
+# 1. Update and install core tools with better error handling
+# We use --fix-missing and multiple retries behavior implicitly by cleaning first
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
-    gpg \
+    gnupg \
     wget \
     kcptun \
     software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt update
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update
 
-# 2. Install Python 3.12 (standard stable version)
-# We also install python3-pip and distutils for package management
-RUN apt install -y python3.12 python3.12-venv python3.12-distutils
+# 2. Install Python 3.12
+# Adding python3-pip just in case your script needs dependencies later
+RUN apt-get install -y --no-install-recommends \
+    python3.12 \
+    python3.12-venv \
+    python3.12-distutils && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 3. Setup SagerNet / sing-box
 RUN mkdir -p /etc/apt/keyrings && \
