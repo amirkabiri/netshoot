@@ -44,13 +44,15 @@ RUN GOST_VERSION=$(curl -s https://api.github.com/repos/go-gost/gost/releases/la
     chmod +x /usr/local/bin/gost && \
     rm gost_${GOST_VERSION}_linux_amd64.tar.gz
 
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://sing-box.app/gpg.key | gpg --dearmor -o /etc/apt/keyrings/sagernet.gpg && \
-    chmod a+r /etc/apt/keyrings/sagernet.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/sagernet.gpg] https://deb.sagernet.org/ * *" \
-    > /etc/apt/sources.list.d/sagernet.list && \
-    apt-get update && \
-    apt-get install -y sing-box
+# Replace your existing sing-box RUN command with this:
+RUN ARCH=$(dpkg --print-architecture) && \
+    SB_VERSION=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep tag_name | cut -d '"' -f 4 | sed 's/v//') && \
+    wget https://github.com/SagerNet/sing-box/releases/download/v${SB_VERSION}/sing-box-${SB_VERSION}-linux-${ARCH}.tar.gz && \
+    tar -zxvf sing-box-${SB_VERSION}-linux-${ARCH}.tar.gz && \
+    # The tar creates a folder, we find the binary inside and move it
+    mv sing-box-*/sing-box /usr/local/bin/sing-box && \
+    chmod +x /usr/local/bin/sing-box && \
+    rm -rf sing-box-* \
 
 WORKDIR /root
 
