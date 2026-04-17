@@ -56,7 +56,9 @@ RUN ARCH=$(dpkg --print-architecture) && \
 
 WORKDIR /root
 
-RUN apt install -y --no-install-recommends wireguard wireguard-tools
+ENV WG_QUICK_USERSPACE_IMPLEMENTATION=wireguard-go
+ENV WG_SUDO=1
+RUN apt install -y --no-install-recommends wireguard-go wireguard-tools
 
 RUN sing-box version && \
     gost -V && \
